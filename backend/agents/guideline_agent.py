@@ -5,9 +5,9 @@ Retrieves relevant chunks from the local FAISS vector store and parses
 them directly into structured GuidelineEntry objects.
 
 This agent does NOT call the LLM for extraction — MedGemma 4B reliably
-returns empty recommendations when asked to extract from chunks.
-Direct rule-based parsing of the retrieved text is faster, more reliable,
-and fully grounded in the actual guideline content.
+returns empty recommendations[] when asked to extract from chunks.
+Direct rule-based parsing is faster, more reliable, and fully grounded
+in the actual guideline content.
 """
 
 from __future__ import annotations
@@ -21,17 +21,36 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# ── Category detection from section headers ──────────────────────────────────
+# ── Filename → human-readable citation ───────────────────────────────────────
+
+_SOURCE_LABELS: dict[str, str] = {
+    "sample_respiratory_guidelines.txt":       "ATS/ERS/JRS/ALAT IPF & Respiratory Guidelines (2022)",
+    "connective_tissue_ild_guidelines.txt":    "ATS/ERS CTD-ILD · BTS ILD Guidelines (2022–2024)",
+}
+
+def _label(filename: str) -> str:
+    """Return a human-readable citation for a guideline filename."""
+    base = filename.rsplit("/", 1)[-1]   # strip any path prefix
+    return _SOURCE_LABELS.get(base, base.replace("_", " ").replace(".txt", "").replace(".pdf", ""))
+
+
+# ── Category detection from section headers ───────────────────────────────────
 
 _HEADER_CATEGORY: list[tuple[re.Pattern, str]] = [
-    (re.compile(r"workup|diagnostic|investigation|screen", re.I), "Workup"),
-    (re.compile(r"management|treatment|therapy|therapeut|antifibrotic|anti-fibrotic|pharmacolog", re.I), "Management"),
-    (re.compile(r"monitor|surveillance|follow.?up|serial|repeat", re.I), "Monitoring"),
-    (re.compile(r"follow.?up|referral|refer all|review", re.I), "Follow-up"),
+    (re.compile(r"workup|investigation|serolog|screen|biopsy|broncho|echocard", re.I), "Workup"),
+    (re.compile(r"management|treatment|therapy|therapeut|antifibrotic|anti-fibrotic|pharmacolog|prescri", re.I), "Management"),
+    (re.compile(r"monitor|surveillance|serial|repeat pft|dlco every|fvc every", re.I), "Monitoring"),
+    (re.compile(r"follow.?up|referral|refer all|review appointment", re.I), "Follow-up"),
 ]
+
+# Sections whose bullets are purely diagnostic criteria — skip them
+_SKIP_SECTION = re.compile(r"\bdiagnos[ie]|diagnostic criteria|definition\b|key hrct features", re.I)
 
 _CONFIDENCE_DIRECT   = re.compile(r"\brecommend|indicated|should\b|required|must\b|standard of care", re.I)
 _CONFIDENCE_INFERRED = re.compile(r"\bsuggest|consider|may\b|conditional|optional|could\b", re.I)
+
+# Entries that are clearly truncated mid-sentence
+_INCOMPLETE = re.compile(r"[a-z,]$")   # ends with lowercase letter or comma → truncated chunk edge
 
 
 def _category_from_context(line: str, fallback: str) -> str:
@@ -53,29 +72,36 @@ def _parse_chunk(chunk: dict) -> List[dict]:
     """
     Extract actionable recommendation bullets from a single retrieved chunk.
 
-    Strategy:
-    - Walk lines looking for section headers (WORKUP, MANAGEMENT, MONITORING …)
-    - Collect bullet lines (starting with '- ') under the active category
-    - Multi-line bullets (indented continuation) are joined to the preceding line
+    - Walk lines, update active category when a section header is found
+    - Skip bullets in DIAGNOSIS / DEFINITION sections
+    - Collect bullet lines (starting with '- ') with multi-line continuation
+    - Filter truncated bullets (end mid-word at chunk boundary)
     """
-    text   = chunk.get("text", "")
-    source = chunk.get("source", "Unknown")
-    lines  = text.splitlines()
+    text    = chunk.get("text", "")
+    source  = chunk.get("source", "Unknown")
+    label   = _label(source)
+    lines   = text.splitlines()
 
-    current_category = "Management"   # sensible default
-    pending_bullet   = None
+    current_category   = "Management"
+    skip_section       = False
+    pending_bullet: str | None = None
     entries: List[dict] = []
 
     def _flush(bullet: str | None):
         if not bullet:
             return
         bullet = re.sub(r"\s+", " ", bullet).strip()
+        # Skip too-short, truncated, or diagnostic-criteria bullets
         if len(bullet) < 25:
+            return
+        if _INCOMPLETE.search(bullet):
+            return
+        if skip_section:
             return
         entries.append({
             "category":       current_category,
             "recommendation": bullet,
-            "source":         source,
+            "source":         label,
             "confidence":     _confidence(bullet),
         })
 
@@ -84,17 +110,18 @@ def _parse_chunk(chunk: dict) -> List[dict]:
         if not stripped:
             continue
 
-        # Section header detection: lines that are all-caps or contain known keywords
-        # e.g. "1.3 MANAGEMENT (GUIDELINE RECOMMENDATIONS)" or "## Workup"
+        # Section header detection
         is_header = (
-            bool(re.match(r"^\d+[\.\d]* [A-Z]", stripped))     # numbered section
-            or bool(re.match(r"^#+\s+\S", stripped))            # markdown heading
-            or (stripped.isupper() and len(stripped) < 80)      # ALL CAPS header
+            bool(re.match(r"^\d+[\.\d]* [A-Z]", stripped))
+            or bool(re.match(r"^#+\s+\S", stripped))
+            or (stripped.isupper() and 4 < len(stripped) < 80)
         )
         if is_header:
             _flush(pending_bullet)
             pending_bullet = None
-            current_category = _category_from_context(stripped, current_category)
+            skip_section = bool(_SKIP_SECTION.search(stripped))
+            if not skip_section:
+                current_category = _category_from_context(stripped, current_category)
             continue
 
         # Bullet line
@@ -103,13 +130,14 @@ def _parse_chunk(chunk: dict) -> List[dict]:
             pending_bullet = stripped[2:].strip()
             continue
 
-        # Indented continuation of previous bullet
+        # Indented continuation
         if pending_bullet and line.startswith("  "):
             pending_bullet += " " + stripped
             continue
 
-        # Otherwise just update category hint from paragraph text
-        current_category = _category_from_context(stripped, current_category)
+        # Paragraph: update category hint (but don't disrupt pending bullet)
+        if not pending_bullet:
+            current_category = _category_from_context(stripped, current_category)
 
     _flush(pending_bullet)
     return entries
@@ -123,25 +151,19 @@ def _rag_query(soap: "SOAPNote", ddx: "DifferentialDiagnosis") -> str:
     )
 
 
-def _strip_thinking_blocks(text: str) -> str:
-    text = re.sub(r"<unused\d+>thought\s*", "", text)
-    text = re.sub(r"<unused\d+>", "", text)
-    return text
-
-
 def run(
-    soap: "SOAPNote",
-    ddx:  "DifferentialDiagnosis",
-    data: "ClinicalInput",
+    soap:      "SOAPNote",
+    ddx:       "DifferentialDiagnosis",
+    data:      "ClinicalInput",
     retriever,
     engine,
 ) -> "GuidelineRecommendation":
     from schemas import GuidelineRecommendation, GuidelineEntry
 
-    # ── 1. Retrieve relevant chunks ───────────────────────────────────────────
-    query: str  = _rag_query(soap, ddx)
+    # ── 1. Retrieve ──────────────────────────────────────────────────────────
+    query: str       = _rag_query(soap, ddx)
     chunks: List[dict] = retriever.retrieve(query) if retriever else []
-    sources = list({c.get("source", "") for c in chunks if c.get("source")})
+    sources = list({_label(c.get("source", "")) for c in chunks if c.get("source")})
 
     # Debug dump
     import pathlib, time as _time
@@ -162,33 +184,32 @@ def run(
     for chunk in chunks:
         raw_entries.extend(_parse_chunk(chunk))
 
-    # De-duplicate by recommendation text (keep first occurrence)
+    # De-duplicate on recommendation text (keep first occurrence)
     seen: set[str] = set()
-    unique_entries: List[dict] = []
+    unique: List[dict] = []
     for e in raw_entries:
         key = e["recommendation"][:80].lower()
         if key not in seen:
             seen.add(key)
-            unique_entries.append(e)
+            unique.append(e)
 
-    # Debug dump
     pathlib.Path("/tmp/guideline_raw_output.txt").write_text(
-        f"[{_time.strftime('%H:%M:%S')}] Parsed {len(unique_entries)} entries (rule-based, no LLM)\n\n"
-        + "\n".join(f"[{e['category']}] {e['recommendation']}" for e in unique_entries)
+        f"[{_time.strftime('%H:%M:%S')}] {len(unique)} entries (rule-based)\n\n"
+        + "\n".join(f"[{e['category']}] ({e['confidence']}) {e['recommendation']}" for e in unique)
     )
 
     entries: List[GuidelineEntry] = [
         GuidelineEntry(
-            category=e["category"],
-            recommendation=e["recommendation"],
-            source=e["source"],
-            confidence=e["confidence"],
+            category       = e["category"],
+            recommendation = e["recommendation"],
+            source         = e["source"],
+            confidence     = e["confidence"],
         )
-        for e in unique_entries
+        for e in unique
     ]
 
     return GuidelineRecommendation(
-        recommendations=entries,
-        retrieved_sources=sources,
-        raw="\n".join(e["recommendation"] for e in unique_entries),
+        recommendations  = entries,
+        retrieved_sources = sources,
+        raw              = "\n".join(e["recommendation"] for e in unique),
     )

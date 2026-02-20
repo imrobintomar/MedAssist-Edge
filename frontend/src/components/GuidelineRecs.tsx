@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import type { GuidelineRecommendation, GuidelineEntry } from "../types";
 import { CopyButton } from "./CopyButton";
-import { BookOpen, FlaskConical, Pill, BarChart3, CalendarClock, FileQuestion } from "lucide-react";
+import { BookOpen, FlaskConical, Pill, BarChart3, CalendarClock, FileQuestion, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Props {
   guidelines: GuidelineRecommendation;
@@ -21,6 +21,7 @@ const CONFIDENCE_CONFIG: Record<string, { bg: string; border: string; text: stri
 };
 
 const RecCard: React.FC<{ rec: GuidelineEntry }> = ({ rec }) => {
+  const [expanded, setExpanded] = useState(false);
   const cat = CATEGORY_CONFIG[rec.category] ?? {
     icon: FileQuestion, bg: "#f8fafc", border: "#94a3b8", iconColor: "#64748b", labelColor: "#475569",
   };
@@ -55,10 +56,29 @@ const RecCard: React.FC<{ rec: GuidelineEntry }> = ({ rec }) => {
       {/* Body */}
       <div className="px-4 py-3">
         <p className="text-sm text-slate-700 leading-relaxed mb-2.5">{rec.recommendation}</p>
-        <div className="flex items-center gap-1.5 text-xs text-slate-400">
+
+        {/* Source — expandable */}
+        <button
+          onClick={() => setExpanded(e => !e)}
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-clinical-600 transition-colors w-full text-left"
+        >
           <BookOpen size={11} />
-          <span className="italic">{rec.source}</span>
-        </div>
+          <span className="italic truncate flex-1">{rec.source}</span>
+          {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+        </button>
+
+        {expanded && (
+          <div
+            className="mt-2 px-3 py-2 rounded-lg text-xs text-slate-600 leading-relaxed"
+            style={{ background: "#f8fafc", border: "1px solid #e2e8f0" }}
+          >
+            <p className="font-semibold text-slate-700 mb-0.5">Reference</p>
+            <p>{rec.source}</p>
+            <p className="mt-1 text-slate-400 italic">
+              Retrieved from local guideline index. Always verify against the original publication before clinical use.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -75,8 +95,7 @@ export const GuidelineRecs: React.FC<Props> = ({ guidelines }) => {
         <p className="text-xs text-slate-400 italic">
           Retrieved from local guideline index
           {guidelines.retrieved_sources.length > 0 && (
-            <> · {guidelines.retrieved_sources.slice(0, 2).join(", ")}
-            {guidelines.retrieved_sources.length > 2 && " …"}</>
+            <> · {guidelines.retrieved_sources.join(", ")}</>
           )}
         </p>
         <CopyButton text={fullText} label="Copy Recs" />
