@@ -28,7 +28,7 @@ export default function App() {
         </div>
         <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 border border-white/20">
           <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-          <span className="text-xs text-white/90 font-medium">Running locally — no data leaves this machine</span>
+          <span className="text-xs text-white/90 font-medium">Running locally  no data leaves this machine</span>
         </div>
       </header>
 

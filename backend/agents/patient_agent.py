@@ -94,11 +94,26 @@ def _extract_json_object(text: str) -> str | None:
 
 
 def _strip_thinking_blocks(text: str) -> str:
-    """Remove MedGemma <unusedXX>thought...</unusedXX> thinking blocks."""
-    # Strip opening thinking token (e.g. <unused94>thought)
-    text = re.sub(r"<unused\d+>thought\s*", "", text)
-    # Strip any remaining <unusedXX> tokens (e.g. closing <unused95>)
-    text = re.sub(r"<unused\d+>", "", text)
+    """Remove MedGemma thinking blocks including their content.
+
+    MedGemma 1.5 thinking format:
+      <unused94>thought\\n...chain-of-thought content...\\n<unused95>\\n{JSON}
+
+    Strategy: if a closing <unusedXX> tag exists, remove everything from the
+    first <unusedXX> up to and including the closing tag.  If there is no
+    closing tag (output was cut off mid-thought), strip from the opening tag
+    to the first '{' so we preserve any JSON that follows.
+    """
+    # Pattern for a complete block: <unusedN>...<unusedN>
+    text = re.sub(r"<unused\d+>.*?<unused\d+>", "", text, flags=re.DOTALL)
+    # Any remaining opening tag (unclosed thinking block) — strip to first '{'
+    match = re.search(r"<unused\d+>", text)
+    if match:
+        brace = text.find("{", match.start())
+        if brace != -1:
+            text = text[brace:]
+        else:
+            text = text[: match.start()]   # no JSON found after tag
     return text
 
 
@@ -130,6 +145,52 @@ def _extract_json_from_last_brace(text: str) -> str | None:
     return None
 
 
+def _repair_truncated_json(text: str) -> str | None:
+    """Attempt to close a truncated JSON object by appending missing brackets/braces.
+
+    Only tries if the text contains an opening '{' — avoids false positives.
+    Returns a repaired string or None if repair isn't possible / doesn't help.
+    """
+    start = text.find("{")
+    if start == -1:
+        return None
+    snippet = text[start:]
+    # Walk the snippet counting open braces/brackets and open strings
+    depth_brace = 0
+    depth_bracket = 0
+    in_string = False
+    escape_next = False
+    for ch in snippet:
+        if escape_next:
+            escape_next = False
+            continue
+        if ch == "\\" and in_string:
+            escape_next = True
+            continue
+        if ch == '"':
+            in_string = not in_string
+            continue
+        if in_string:
+            continue
+        if ch == "{":
+            depth_brace += 1
+        elif ch == "}":
+            depth_brace -= 1
+        elif ch == "[":
+            depth_bracket += 1
+        elif ch == "]":
+            depth_bracket -= 1
+    if depth_brace == 0 and depth_bracket == 0:
+        return None  # Already balanced — other parsers would have handled it
+    # Close the in-progress string if needed
+    closing = ""
+    if in_string:
+        closing += '"'
+    closing += "]" * max(depth_bracket, 0)
+    closing += "}" * max(depth_brace, 0)
+    return snippet + closing
+
+
 def parse_response(raw: str) -> dict:
     import pathlib, time
     _dump = pathlib.Path("/tmp/patient_raw_output.txt")
@@ -153,6 +214,13 @@ def parse_response(raw: str) -> dict:
             pass
     # Fall back to first { extractor
     candidate = _extract_json_object(text)
+    if candidate:
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            pass
+    # Last resort: try to repair a truncated JSON object by closing open brackets
+    candidate = _repair_truncated_json(text)
     if candidate:
         try:
             return json.loads(candidate)

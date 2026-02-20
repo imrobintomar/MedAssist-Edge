@@ -37,7 +37,7 @@ GENERATION_CONFIG = {
 AGENT_MAX_TOKENS = {
     "soap":      768,   # 4 SOAP sections, structured text
     "ddx":       900,   # 5 diagnoses + reasoning summary
-    "patient":   768,   # summary + 6 key points + next steps
+    "patient":   2048,  # thinking blocks (~600 tok) + JSON (~400 tok); needs headroom
     "guideline": 0,     # no LLM call — rule-based parser only
 }
 
