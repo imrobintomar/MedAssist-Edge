@@ -178,21 +178,8 @@ MedGemma/
 │   └── download_model.py     # Full model + embedder download
 ├── notebooks/
 │   └── medassist_edge_kaggle.ipynb   # Kaggle submission notebook
-├── tests/               # Unit tests (mocked engine, RAG integration)
-└── docs/                # Architecture, safety, edge AI, demo script
+└── tests/               # Unit tests (mocked engine, RAG integration)
 ```
-
----
-
-## Documentation
-
-| Document | Contents |
-|---|---|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design, data flow, component list |
-| [docs/SAFETY.md](docs/SAFETY.md) | Safety constraints, governance, limitations |
-| [docs/EDGE_AI.md](docs/EDGE_AI.md) | Quantization, latency, RAM budget |
-| [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) | 3-minute demo walkthrough with sample case |
-| [docs/KAGGLE_WRITEUP.md](docs/KAGGLE_WRITEUP.md) | Competition write-up and design rationale |
 
 ---
 

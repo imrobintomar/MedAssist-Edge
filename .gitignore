@@ -34,6 +34,9 @@ frontend/.env
 frontend/.env.local
 frontend/.env.production
 
+# Internal docs (not for public repo)
+docs/
+
 # Notebooks output
 notebooks/.ipynb_checkpoints/
 
