@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 import { InputPanel } from "./components/InputPanel";
 import { OutputPanel } from "./components/OutputPanel";
 import { LoadingState } from "./components/LoadingState";
+import { About } from "./components/About";
 import { useAnalysis } from "./hooks/useAnalysis";
-import { AlertCircle, Activity, Sparkles, RefreshCw, ShieldAlert } from "lucide-react";
+import { AlertCircle, Activity, Sparkles, RefreshCw, ShieldAlert, Info } from "lucide-react";
 
 export default function App() {
   const { status, result, error, activeTab, setActiveTab, run, reset } = useAnalysis();
+  const [page, setPage] = useState<"main" | "about">("main");
 
   return (
     <div className="min-h-screen" style={{ background: "linear-gradient(160deg, #eef2ff 0%, #f0fdfa 60%, #f8fafc 100%)" }}>
@@ -19,25 +21,37 @@ export default function App() {
           </div>
           <div>
             <h1 className="font-bold text-white text-lg leading-none tracking-tight">
-              MedAssist<span className="text-teal-400">-Edge</span>
+              MedAssist-Edge
             </h1>
-            <p className="text-xs text-blue-200 leading-none mt-0.5 font-light">
+            <p className="text-xs text-white leading-none mt-0.5 font-light">
               Offline Agentic Clinical Co-Pilot · Powered by MedGemma
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 border border-white/20">
-          <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-          <span className="text-xs text-white/90 font-medium">Running locally  no data leaves this machine</span>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setPage(p => p === "about" ? "main" : "about")}
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-white/25 text-white hover:bg-white/10 transition-colors"
+          >
+            <Info size={13} />
+            {page === "about" ? "Back" : "About"}
+          </button>
+          <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 border border-white/20">
+            <span className="w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
+            <span className="text-xs text-white/90 font-medium">Running locally · no data leaves this machine</span>
+          </div>
         </div>
       </header>
 
+      {/* ── About page ─────────────────────────────────────────────────── */}
+      {page === "about" && <About />}
+
       {/* ── Main layout ────────────────────────────────────────────────── */}
-      <main className="max-w-[1400px] mx-auto px-6 py-5 grid grid-cols-[440px_1fr] gap-5 items-start">
+      {page === "main" && <main className="max-w-[1400px] mx-auto px-6 py-5 grid grid-cols-[440px_1fr] gap-5 items-start">
 
         {/* Left — Input */}
         <div className="glass-card rounded-2xl shadow-card overflow-hidden">
-          <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #2563eb, #14b8a6)" }} />
+          <div className="h-1 w-full" style={{ background: "#080345" }} />
           <div className="p-6">
             <InputPanel onSubmit={run} onReset={reset} isLoading={status === "loading"} />
           </div>
@@ -45,7 +59,7 @@ export default function App() {
 
         {/* Right — Output */}
         <div className="glass-card rounded-2xl shadow-card overflow-hidden min-h-[560px] flex flex-col">
-          <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #7c3aed, #2563eb, #14b8a6)" }} />
+          <div className="h-1 w-full" style={{ background: "#080345" }} />
 
           {status === "idle" && (
             <div className="flex flex-col items-center justify-center flex-1 py-20 text-center gap-4 px-8">
@@ -94,7 +108,7 @@ export default function App() {
             </div>
           )}
         </div>
-      </main>
+      </main>}
 
       {/* ── Footer disclaimer ───────────────────────────────────────────── */}
       <footer className="mt-4 px-6 pb-6">
