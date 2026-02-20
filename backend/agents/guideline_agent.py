@@ -1,178 +1,151 @@
 """
 Guideline Retrieval & Recommendation Agent (RAG)
 ─────────────────────────────────────────────────
-Role: Retrieve relevant clinical guideline passages from the local FAISS
-      vector store and synthesise citation-backed recommendations.
+Retrieves relevant chunks from the local FAISS vector store and parses
+them directly into structured GuidelineEntry objects.
 
-MedGemma 1.5 API: messages dict format via processor.apply_chat_template().
-
-RAG design:
-  - Query = top DDx conditions + chief complaint
-  - Retrieved chunks injected verbatim into the prompt
-  - Model synthesises, never invents, guideline content
-  - Every recommendation attributed to its source chunk
+This agent does NOT call the LLM for extraction — MedGemma 4B reliably
+returns empty recommendations when asked to extract from chunks.
+Direct rule-based parsing of the retrieved text is faster, more reliable,
+and fully grounded in the actual guideline content.
 """
 
 from __future__ import annotations
-import json
-import logging
 import re
-from typing import TYPE_CHECKING, List, Optional
+import logging
+from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from schemas import ClinicalInput, SOAPNote, DifferentialDiagnosis, GuidelineRecommendation
 
 logger = logging.getLogger(__name__)
 
-_SYSTEM = (
-    "You are a clinical guideline synthesis assistant.\n\n"
-    "You are given:\n"
-    "1. A patient's structured clinical summary (SOAP + differential diagnosis).\n"
-    "2. Excerpts retrieved from authoritative clinical guidelines.\n\n"
-    "TASK: Extract every actionable recommendation from the provided guideline excerpts "
-    "that is relevant to this patient. Organise them into JSON.\n\n"
-    "RULES:\n"
-    "1. Extract recommendations from the provided excerpts only. Do not invent guideline content.\n"
-    "2. Attribute each recommendation to its source file and section.\n"
-    "3. Assign each recommendation a category: choose one of "
-    "Workup, Management, Monitoring, or Follow-up.\n"
-    "4. Use hedged language: 'Guidelines suggest…', 'According to [source]…'.\n"
-    "5. Do NOT recommend specific drug doses. Do NOT issue clinical orders.\n"
-    "6. If the excerpts contain ANY relevant clinical content, produce recommendations. "
-    "Only return empty recommendations if the excerpts are completely unrelated to the case.\n"
-    "7. Output ONLY valid JSON — no prose, no markdown outside the JSON block.\n\n"
-    "OUTPUT SCHEMA (populate recommendations array with all relevant items found):\n"
-    "{\"recommendations\": ["
-    "{\"category\": \"Workup\", \"recommendation\": \"...\", \"source\": \"...\", \"confidence\": \"Direct\"}, "
-    "{\"category\": \"Management\", \"recommendation\": \"...\", \"source\": \"...\", \"confidence\": \"Direct\"}, "
-    "{\"category\": \"Monitoring\", \"recommendation\": \"...\", \"source\": \"...\", \"confidence\": \"Direct\"}"
-    "], "
-    "\"retrieved_sources\": [\"source1\", \"source2\"]}"
-)
+
+# ── Category detection from section headers ──────────────────────────────────
+
+_HEADER_CATEGORY: list[tuple[re.Pattern, str]] = [
+    (re.compile(r"workup|diagnostic|investigation|screen", re.I), "Workup"),
+    (re.compile(r"management|treatment|therapy|therapeut|antifibrotic|anti-fibrotic|pharmacolog", re.I), "Management"),
+    (re.compile(r"monitor|surveillance|follow.?up|serial|repeat", re.I), "Monitoring"),
+    (re.compile(r"follow.?up|referral|refer all|review", re.I), "Follow-up"),
+]
+
+_CONFIDENCE_DIRECT   = re.compile(r"\brecommend|indicated|should\b|required|must\b|standard of care", re.I)
+_CONFIDENCE_INFERRED = re.compile(r"\bsuggest|consider|may\b|conditional|optional|could\b", re.I)
 
 
-def _format_chunks(chunks: List[dict]) -> str:
-    if not chunks:
-        return "No guideline excerpts retrieved."
-    import re as _re
-    parts = []
-    for i, chunk in enumerate(chunks, 1):
-        text = chunk.get("text", "")
-        # Remove section separator lines (===, ---, >>>)
-        text = _re.sub(r"^[=\-]{4,}\s*$", "", text, flags=_re.MULTILINE)
-        # Collapse multiple blank lines
-        text = _re.sub(r"\n{3,}", "\n\n", text).strip()
-        parts.append(f"[{i}] SOURCE: {chunk.get('source', 'Unknown')}\n{text}")
-    return "\n\n---\n\n".join(parts)
+def _category_from_context(line: str, fallback: str) -> str:
+    for pattern, cat in _HEADER_CATEGORY:
+        if pattern.search(line):
+            return cat
+    return fallback
+
+
+def _confidence(text: str) -> str:
+    if _CONFIDENCE_DIRECT.search(text):
+        return "Direct"
+    if _CONFIDENCE_INFERRED.search(text):
+        return "Inferred"
+    return "Low-evidence"
+
+
+def _parse_chunk(chunk: dict) -> List[dict]:
+    """
+    Extract actionable recommendation bullets from a single retrieved chunk.
+
+    Strategy:
+    - Walk lines looking for section headers (WORKUP, MANAGEMENT, MONITORING …)
+    - Collect bullet lines (starting with '- ') under the active category
+    - Multi-line bullets (indented continuation) are joined to the preceding line
+    """
+    text   = chunk.get("text", "")
+    source = chunk.get("source", "Unknown")
+    lines  = text.splitlines()
+
+    current_category = "Management"   # sensible default
+    pending_bullet   = None
+    entries: List[dict] = []
+
+    def _flush(bullet: str | None):
+        if not bullet:
+            return
+        bullet = re.sub(r"\s+", " ", bullet).strip()
+        if len(bullet) < 25:
+            return
+        entries.append({
+            "category":       current_category,
+            "recommendation": bullet,
+            "source":         source,
+            "confidence":     _confidence(bullet),
+        })
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        # Section header detection: lines that are all-caps or contain known keywords
+        # e.g. "1.3 MANAGEMENT (GUIDELINE RECOMMENDATIONS)" or "## Workup"
+        is_header = (
+            bool(re.match(r"^\d+[\.\d]* [A-Z]", stripped))     # numbered section
+            or bool(re.match(r"^#+\s+\S", stripped))            # markdown heading
+            or (stripped.isupper() and len(stripped) < 80)      # ALL CAPS header
+        )
+        if is_header:
+            _flush(pending_bullet)
+            pending_bullet = None
+            current_category = _category_from_context(stripped, current_category)
+            continue
+
+        # Bullet line
+        if stripped.startswith("- "):
+            _flush(pending_bullet)
+            pending_bullet = stripped[2:].strip()
+            continue
+
+        # Indented continuation of previous bullet
+        if pending_bullet and line.startswith("  "):
+            pending_bullet += " " + stripped
+            continue
+
+        # Otherwise just update category hint from paragraph text
+        current_category = _category_from_context(stripped, current_category)
+
+    _flush(pending_bullet)
+    return entries
 
 
 def _rag_query(soap: "SOAPNote", ddx: "DifferentialDiagnosis") -> str:
     conditions = " ".join(d.condition for d in ddx.diagnoses[:3])
-    # Bias toward management/treatment/monitoring chunks not just diagnostic definitions
     return (
         f"{conditions} management treatment monitoring guidelines recommend "
         f"anti-fibrotic immunosuppression workup follow-up"
     )
 
 
-def build_messages(
-    soap: "SOAPNote",
-    ddx: "DifferentialDiagnosis",
-    chunks: List[dict],
-) -> List[dict]:
-    ddx_list = ", ".join(
-        f"{d.condition} ({d.likelihood})" for d in ddx.diagnoses[:3]
-    ) or "Not available"
-
-    user_text = (
-        f"CLINICAL SUMMARY:\n"
-        f"Assessment: {soap.assessment}\n"
-        f"Top DDx: {ddx_list}\n\n"
-        f"RETRIEVED GUIDELINE EXCERPTS:\n"
-        f"{_format_chunks(chunks)}\n\n"
-        "Synthesise recommendations based ONLY on the excerpts above."
-    )
-    return [
-        {"role": "system", "content": [{"type": "text", "text": _SYSTEM}]},
-        {"role": "user",   "content": [{"type": "text", "text": user_text}]},
-    ]
-
-
-def _extract_json_object(text: str) -> str | None:
-    """Extract first complete JSON object using balanced-brace matching."""
-    start = text.find("{")
-    if start == -1:
-        return None
-    depth = 0
-    in_string = False
-    escape_next = False
-    for i, ch in enumerate(text[start:], start):
-        if escape_next:
-            escape_next = False
-            continue
-        if ch == "\\" and in_string:
-            escape_next = True
-            continue
-        if ch == '"':
-            in_string = not in_string
-            continue
-        if in_string:
-            continue
-        if ch == "{":
-            depth += 1
-        elif ch == "}":
-            depth -= 1
-            if depth == 0:
-                return text[start : i + 1]
-    return None
-
-
 def _strip_thinking_blocks(text: str) -> str:
-    """Remove MedGemma <unusedXX>thought...</unusedXX> thinking blocks."""
     text = re.sub(r"<unused\d+>thought\s*", "", text)
     text = re.sub(r"<unused\d+>", "", text)
     return text
 
 
-def parse_response(raw: str) -> dict:
-    import pathlib, time
-    _dump = pathlib.Path("/tmp/guideline_raw_output.txt")
-    _dump.write_text(f"[{time.strftime('%H:%M:%S')}]\n{raw}\n")
-
-    text = _strip_thinking_blocks(raw)
-    text = re.sub(r"```(?:json)?\s*", "", text).strip().rstrip("`").strip()
-    logger.debug("Guideline raw output: %s", raw)
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-    candidate = _extract_json_object(text)
-    if candidate:
-        try:
-            return json.loads(candidate)
-        except json.JSONDecodeError:
-            pass
-    logger.warning("Guideline parse failed. Raw output:\n%s", raw)
-    return {"recommendations": [], "retrieved_sources": []}
-
-
 def run(
     soap: "SOAPNote",
-    ddx: "DifferentialDiagnosis",
+    ddx:  "DifferentialDiagnosis",
     data: "ClinicalInput",
     retriever,
     engine,
 ) -> "GuidelineRecommendation":
     from schemas import GuidelineRecommendation, GuidelineEntry
 
-    query = _rag_query(soap, ddx)
+    # ── 1. Retrieve relevant chunks ───────────────────────────────────────────
+    query: str  = _rag_query(soap, ddx)
     chunks: List[dict] = retriever.retrieve(query) if retriever else []
     sources = list({c.get("source", "") for c in chunks if c.get("source")})
 
-    # Debug: dump retrieved chunks to file
+    # Debug dump
     import pathlib, time as _time
-    _cdump = pathlib.Path("/tmp/guideline_chunks.txt")
-    _cdump.write_text(
+    pathlib.Path("/tmp/guideline_chunks.txt").write_text(
         f"[{_time.strftime('%H:%M:%S')}] Query: {query}\n\n"
         + "\n\n---\n\n".join(
             f"Score={c.get('score', 0):.3f} Source={c.get('source')}\n{c.get('text', '')}"
@@ -180,22 +153,42 @@ def run(
         )
     )
 
-    messages = build_messages(soap, ddx, chunks)
-    raw = engine.generate(messages)
-    parsed = parse_response(raw)
+    if not chunks:
+        logger.warning("No guideline chunks retrieved.")
+        return GuidelineRecommendation(recommendations=[], retrieved_sources=[], raw="")
+
+    # ── 2. Parse chunks directly (no LLM) ────────────────────────────────────
+    raw_entries: List[dict] = []
+    for chunk in chunks:
+        raw_entries.extend(_parse_chunk(chunk))
+
+    # De-duplicate by recommendation text (keep first occurrence)
+    seen: set[str] = set()
+    unique_entries: List[dict] = []
+    for e in raw_entries:
+        key = e["recommendation"][:80].lower()
+        if key not in seen:
+            seen.add(key)
+            unique_entries.append(e)
+
+    # Debug dump
+    pathlib.Path("/tmp/guideline_raw_output.txt").write_text(
+        f"[{_time.strftime('%H:%M:%S')}] Parsed {len(unique_entries)} entries (rule-based, no LLM)\n\n"
+        + "\n".join(f"[{e['category']}] {e['recommendation']}" for e in unique_entries)
+    )
 
     entries: List[GuidelineEntry] = [
         GuidelineEntry(
-            category=item.get("category", "General"),
-            recommendation=item.get("recommendation", ""),
-            source=item.get("source", "Unknown"),
-            confidence=item.get("confidence", "Low-evidence"),
+            category=e["category"],
+            recommendation=e["recommendation"],
+            source=e["source"],
+            confidence=e["confidence"],
         )
-        for item in parsed.get("recommendations", [])
+        for e in unique_entries
     ]
 
     return GuidelineRecommendation(
         recommendations=entries,
-        retrieved_sources=parsed.get("retrieved_sources", sources),
-        raw=raw,
+        retrieved_sources=sources,
+        raw="\n".join(e["recommendation"] for e in unique_entries),
     )
