@@ -1,0 +1,189 @@
+SAMPLE CLINICAL GUIDELINE EXCERPTS
+Source: Compiled from WHO, ATS/ERS, GOLD — for demonstration purposes only.
+This file is included to allow immediate testing of the RAG pipeline.
+Replace with authoritative local guideline documents before clinical use.
+
+================================================================
+SECTION 1: IDIOPATHIC PULMONARY FIBROSIS (IPF)
+Source: ATS/ERS/JRS/ALAT Evidence-Based Guidelines for IPF (2022 Update)
+================================================================
+
+1.1 DIAGNOSIS
+IPF is a specific form of chronic, progressive fibrosing interstitial pneumonia of unknown cause, occurring primarily in older adults, limited to the lungs.
+Diagnosis requires:
+- Exclusion of other known causes of interstitial lung disease (ILD), e.g. domestic/occupational exposures, connective tissue disease, drug toxicity.
+- HRCT pattern of Usual Interstitial Pneumonia (UIP): honeycombing with or without peripheral, subpleural, basal predominant traction bronchiectasis.
+- Histopathological UIP pattern on surgical lung biopsy in appropriate clinical context when HRCT pattern is not typical UIP.
+Key HRCT features of UIP: subpleural, basal predominant honeycombing; traction bronchiectasis; absence of features suggesting alternative diagnosis.
+
+1.2 WORKUP (RECOMMENDED)
+- Pulmonary function tests (spirometry + DLCO): expected restrictive pattern (FVC↓, FEV1/FVC normal/↑, DLCO↓)
+- 6-minute walk test: assess functional capacity and desaturation
+- Echocardiography: exclude pulmonary hypertension
+- Bronchoalveolar lavage: may help exclude alternative diagnoses; not diagnostic for IPF
+- Surgical lung biopsy: indicated when HRCT is indeterminate; VATS preferred
+- Serological workup: ANA, RF, anti-CCP, myositis panel, to exclude connective tissue disease-associated ILD
+
+1.3 MANAGEMENT (GUIDELINE RECOMMENDATIONS)
+- Antifibrotic therapy is recommended for most patients with IPF:
+  Nintedanib or pirfenidone — shown to slow FVC decline; discuss with specialist.
+- Treat gastro-oesophageal reflux disease (GERD) if present — potential role in disease progression.
+- Refer all suitable patients for lung transplantation evaluation at time of diagnosis.
+- Supplemental oxygen for patients with resting or exertional hypoxaemia (SpO2 <88%).
+- Pulmonary rehabilitation: improves exercise tolerance and quality of life; conditionally recommended.
+- Avoid immunosuppression with prednisone + azathioprine + N-acetylcysteine combination (shown to be harmful).
+- Palliative care integration: discuss symptom management, advance care planning early.
+
+1.4 MONITORING
+- FVC every 3–6 months: decline >10% in 12 months indicates disease progression and/or treatment failure.
+- DLCO every 6–12 months.
+- Chest HRCT: not routinely repeated unless clinical deterioration or to evaluate for complications.
+- Acute exacerbation of IPF: bilateral, diffuse alveolar damage superimposed on UIP background — high mortality; refer urgently.
+
+================================================================
+SECTION 2: COMMUNITY-ACQUIRED PNEUMONIA (CAP)
+Source: IDSA/ATS Consensus Guidelines on CAP (2019 Update)
+================================================================
+
+2.1 DIAGNOSIS
+CAP is defined as an acute infection of the pulmonary parenchyma acquired outside the hospital setting.
+Diagnostic criteria (two or more):
+- New or progressive infiltrate on chest imaging
+- Fever >38°C or hypothermia <36°C
+- Productive cough, purulent sputum, or change in sputum character
+- Auscultatory findings consistent with pneumonia
+- WBC >10,000 or <4,000 cells/mm³
+
+Severity assessment using PSI (Pneumonia Severity Index) or CURB-65 is recommended to guide site-of-care decision.
+CURB-65 ≥2 suggests hospitalisation; CURB-65 ≥3 suggests ICU consideration.
+
+2.2 WORKUP
+- Chest X-ray (posterior-anterior and lateral): confirm infiltrate
+- Pulse oximetry: assess need for supplemental oxygen
+- Blood cultures x2 (before antibiotics) for hospitalised patients with severe CAP
+- Sputum Gram stain and culture: in hospitalised patients who can produce a good specimen
+- Urinary antigen tests: Legionella pneumophila, Streptococcus pneumoniae — in severe CAP
+- HIV testing: consider in CAP in adults <55 years without a clear predisposing condition
+- Procalcitonin: may guide antibiotic de-escalation; not to replace clinical assessment
+
+2.3 MANAGEMENT
+Antibiotic selection should be guided by microbiological data when available. Initial empirical therapy:
+- Outpatient, no comorbidities: amoxicillin monotherapy or doxycycline (discuss with prescribing clinician)
+- Outpatient, with comorbidities: amoxicillin-clavulanate or respiratory fluoroquinolone (local resistance patterns apply)
+- Inpatient, non-ICU: beta-lactam + macrolide combination OR respiratory fluoroquinolone monotherapy
+- ICU: beta-lactam + azithromycin OR beta-lactam + respiratory fluoroquinolone
+Duration: 5 days for most non-severe CAP if clinically improving (afebrile, improving WBC, tolerating oral intake).
+Note: Specific antibiotic choices, dosages, and durations must be confirmed with a clinician and local formulary.
+
+2.4 MONITORING
+- Clinical reassessment at 48–72 hours for treatment response
+- Chest X-ray: not routinely repeated at hospital discharge; follow-up at 4–8 weeks in high-risk patients (age >50, smoker) to exclude malignancy
+
+================================================================
+SECTION 3: TUBERCULOSIS (TB)
+Source: WHO Guidelines for Treatment of Drug-Susceptible Tuberculosis (2022)
+================================================================
+
+3.1 DIAGNOSIS
+Pulmonary TB suspected when:
+- Prolonged cough (≥2 weeks), haemoptysis, fever, night sweats, weight loss, fatigue
+- Contact with known TB case
+- HIV positive with any respiratory symptoms
+- Chest X-ray abnormalities (upper lobe infiltrates, cavities, miliary pattern)
+
+Microbiological confirmation:
+- Sputum smear microscopy (acid-fast bacilli): widely available; moderate sensitivity
+- GeneXpert MTB/RIF (Xpert): recommended first-line test — simultaneous TB detection and rifampicin resistance
+- Sputum culture (Löwenstein–Jensen or MGIT): gold standard; 2–8 weeks
+- IGRA (interferon-gamma release assay) or tuberculin skin test: for latent TB, not active disease
+
+3.2 MANAGEMENT (DRUG-SUSCEPTIBLE TB)
+Standard regimen: 6-month course in two phases.
+- Intensive phase (2 months): isoniazid (H), rifampicin (R), pyrazinamide (Z), ethambutol (E) — HRZE
+- Continuation phase (4 months): isoniazid (H), rifampicin (R) — HR
+Directly Observed Therapy (DOT) or supported treatment (DOTS): recommended to ensure adherence.
+Pyridoxine (vitamin B6) supplementation: with isoniazid in patients at risk of peripheral neuropathy (malnutrition, diabetes, HIV, pregnancy, alcohol use).
+Note: Dosages must be confirmed with TB programme protocols and a clinician. Drug-resistant TB requires specialist referral.
+
+3.3 MONITORING
+- Sputum smear/culture at 2 months and at end of treatment
+- Liver function tests if hepatotoxicity symptoms arise (jaundice, nausea, vomiting)
+- Visual acuity assessment: before and monthly during ethambutol therapy
+- Chest X-ray: not required to confirm cure; microbiological confirmation used
+
+================================================================
+SECTION 4: COPD (CHRONIC OBSTRUCTIVE PULMONARY DISEASE)
+Source: GOLD 2023 Report — Global Strategy for Prevention, Diagnosis and Management of COPD
+================================================================
+
+4.1 DIAGNOSIS
+COPD is a heterogeneous lung condition characterised by chronic respiratory symptoms due to airway and/or alveolar abnormalities caused by significant exposure to noxious particles or gases.
+Spirometric confirmation: post-bronchodilator FEV1/FVC <0.70 confirms persistent airflow obstruction.
+GOLD severity grades (based on post-bronchodilator FEV1):
+- GOLD 1 (Mild): FEV1 ≥80% predicted
+- GOLD 2 (Moderate): 50% ≤ FEV1 <80%
+- GOLD 3 (Severe): 30% ≤ FEV1 <50%
+- GOLD 4 (Very Severe): FEV1 <30%
+
+4.2 WORKUP
+- Post-bronchodilator spirometry: mandatory for diagnosis; peak flow not sufficient
+- Chest X-ray: exclude alternative diagnoses; may show hyperinflation, bullae, flat diaphragm
+- CT chest: not routine; consider if diagnostic doubt or surgical evaluation
+- Pulse oximetry: screen for hypoxaemia at rest
+- ABG (arterial blood gas): if SpO2 <92% or severe exacerbation
+- Alpha-1 antitrypsin deficiency testing: in patients with early-onset COPD, lower lobe emphysema, minimal smoking history, or family history
+
+4.3 MANAGEMENT (STABLE COPD)
+Non-pharmacological (all patients):
+- Smoking cessation: most effective intervention; offer pharmacotherapy support
+- Influenza vaccine annually; pneumococcal vaccine
+- Pulmonary rehabilitation: strongly recommended for GOLD 2–4, MRC dyspnoea ≥2
+- Long-term oxygen therapy (LTOT): if resting PaO2 ≤55 mmHg or SpO2 ≤88%
+
+Inhaled pharmacotherapy (GOLD ABCD framework — confirm with clinician):
+- All symptomatic patients: short-acting bronchodilator (SABA/SAMA) for relief
+- Group A: short-acting bronchodilator prn
+- Group B: long-acting bronchodilator (LABA or LAMA)
+- Group E (≥2 exacerbations/year or ≥1 hospitalisation): LABA + LAMA ± ICS (if eos ≥300)
+
+4.4 MONITORING
+- Spirometry: annually or with significant symptom change
+- CAT score / mMRC dyspnoea: at each visit
+- Exacerbation frequency: drives escalation/de-escalation of therapy
+- Acute exacerbation of COPD: increased dyspnoea, sputum volume/purulence; manage with bronchodilators, systemic corticosteroids (5-day course), antibiotics if indicated
+
+================================================================
+SECTION 5: HEART FAILURE
+Source: ESC Guidelines for the Diagnosis and Treatment of Acute and Chronic Heart Failure (2021)
+================================================================
+
+5.1 DIAGNOSIS
+Heart failure (HF) is defined as a clinical syndrome of symptoms and/or signs caused by structural and/or functional cardiac abnormality.
+HFrEF (reduced EF): LVEF ≤40%
+HFmrEF (mildly reduced EF): LVEF 41–49%
+HFpEF (preserved EF): LVEF ≥50%
+
+Symptoms: dyspnoea, orthopnoea, paroxysmal nocturnal dyspnoea, reduced exercise tolerance, fatigue, ankle swelling
+Signs: elevated JVP, pulmonary crackles, peripheral oedema, S3 gallop
+
+Key investigations:
+- ECG: look for atrial fibrillation, LVH, bundle branch block, ischaemia
+- Chest X-ray: cardiomegaly (CTR >0.5), pulmonary venous congestion, Kerley B lines, pleural effusion
+- NT-proBNP or BNP: elevated in HF; very high negative predictive value if normal
+- Echocardiography: cornerstone — assess systolic/diastolic function, valvular disease, wall motion
+- Blood tests: FBC, renal function, electrolytes, LFTs, fasting glucose, lipids, thyroid function
+
+5.2 MANAGEMENT (HFrEF, LVEF ≤40%)
+Four pillars of evidence-based therapy (discuss with cardiologist for dosing):
+1. ACE inhibitor or ARB or ARNI (sacubitril/valsartan) — reduces mortality
+2. Beta-blocker (bisoprolol, carvedilol, metoprolol succinate) — reduces mortality
+3. MRA (spironolactone or eplerenone) — reduces mortality in NYHA II–IV
+4. SGLT2 inhibitor (dapagliflozin, empagliflozin) — reduces HF hospitalisation and mortality
+Diuretics (loop diuretics): symptom relief for congestion; no mortality benefit per se.
+Note: Specific drug choices, initiating doses, and titration must be managed by a clinician. Uptitrate as tolerated.
+
+5.3 MONITORING
+- Clinical assessment: weight, oedema, JVP, blood pressure, heart rate at each visit
+- Renal function and electrolytes: 1–2 weeks after initiating/changing therapy, then 3–6 monthly
+- Echocardiography: repeat 3–6 months after optimising therapy; annually thereafter
+- NT-proBNP: serial measurements to guide therapy in some centres

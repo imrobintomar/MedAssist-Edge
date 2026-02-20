@@ -1,0 +1,174 @@
+CLINICAL GUIDELINES: CONNECTIVE TISSUE DISEASE-ASSOCIATED ILD AND DIFFERENTIAL DIAGNOSIS OF INTERSTITIAL LUNG DISEASE
+Source: ATS/ERS Clinical Practice Guidelines and British Thoracic Society Guidelines (2022-2024)
+
+================================================================================
+SECTION 1: APPROACH TO INTERSTITIAL LUNG DISEASE (ILD) — DIAGNOSTIC FRAMEWORK
+================================================================================
+
+1.1 Definition
+Interstitial lung disease (ILD) encompasses a heterogeneous group of parenchymal lung disorders characterised by varying degrees of inflammation and fibrosis.
+
+1.2 Key Diagnostic Steps
+- Multidisciplinary team (MDT) discussion: pulmonologist, radiologist, pathologist
+- Detailed occupational, environmental, and drug exposure history
+- Connective tissue disease (CTD) screen: ANA, ENA, RF, anti-CCP, anti-Scl-70, anti-Jo-1, anti-MDA5
+- HRCT chest: pattern characterisation (UIP, NSIP, OP, DIP, LIP, RB-ILD)
+- Pulmonary function tests: spirometry, lung volumes, DLCO
+- Bronchoalveolar lavage (BAL) in selected cases
+- Surgical lung biopsy or transbronchial lung cryobiopsy when diagnosis uncertain
+
+1.3 HRCT Patterns and Associations
+- UIP pattern (honeycombing ± traction bronchiectasis, subpleural/basal): IPF most likely; also CTD-ILD, HP, drug toxicity
+- NSIP pattern (ground-glass opacity, reticulation, subpleural sparing): CTD-ILD most common cause
+- OP pattern (consolidation, peribronchovascular): CTD, drug, infection, cryptogenic
+- Hypersensitivity pneumonitis pattern: upper/mid zone predominance, mosaic attenuation, no honeycombing (subacute)
+
+================================================================================
+SECTION 2: CONNECTIVE TISSUE DISEASE-ASSOCIATED ILD (CTD-ILD)
+================================================================================
+
+Source: EULAR/ACR Guidelines and ATS Statement on CTD-ILD
+
+2.1 When to Suspect CTD-ILD
+- ILD in patient <50 years
+- ILD in a woman of any age
+- NSIP pattern on HRCT
+- Positive autoantibodies (ANA, RF, anti-CCP, myositis-specific antibodies)
+- Systemic features: joint pain, skin changes, Raynaud's, sicca symptoms, dysphagia
+- UIP pattern in younger or female patients
+
+2.2 ANA Positivity and ILD
+- ANA positive at low titres (≤1:80) may be present in 10-15% of healthy adults
+- ANA at 1:80 with speckled pattern warrants further ENA panel testing
+- Speckled ANA pattern most commonly associated with: Anti-Ro/SSA, Anti-La/SSB (Sjögren's), Anti-Sm, Anti-RNP (mixed CTD), Anti-Jo-1 (antisynthetase syndrome)
+- Recommended further testing: anti-Ro, anti-La, anti-Sm, anti-RNP, anti-Jo-1, anti-MDA5, anti-PL7, anti-PL12
+
+2.3 Interstitial Pneumonia with Autoimmune Features (IPAF)
+Criteria (2015 ERS/ATS Task Force):
+- CT domain: NSIP, OP, NSIP+OP overlap, LIP pattern
+- Serological domain: ANA ≥1:320 any pattern, ANA nucleolar/centromere pattern any titre, RF >2× ULN, anti-CCP, anti-dsDNA, anti-Ro, anti-La, anti-Scl-70, anti-tRNA synthetase, anti-MDA5, anti-PM-Scl, anti-MJ
+- Clinical domain: inflammatory arthritis, Raynaud's, Mechanic's hands, digital tip ulceration, unexplained digital oedema, unexplained fixed palmar telangiectasia, unexplained distal digital fissuring, unexplained inflammatory polyarthritis or morning stiffness, unexplained persistent proximal muscle weakness, unexplained myopathy, unexplained pleuritis or pericarditis, unexplained intrinsic airways disease, Raynaud's
+
+2.4 Management of CTD-ILD
+- Treat underlying CTD
+- Immunosuppression: mycophenolate mofetil (first-line for most CTD-ILD), azathioprine, rituximab
+- Anti-fibrotics (nintedanib): for progressive fibrotic ILD including CTD-ILD with fibrotic phenotype
+- Avoid cyclophosphamide except in rapidly progressive disease
+- Monitor with serial PFTs (FVC, DLCO) every 3-6 months
+
+================================================================================
+SECTION 3: HYPERSENSITIVITY PNEUMONITIS (HP)
+================================================================================
+
+Source: ATS Clinical Practice Guideline on Diagnosis of HP (2020)
+
+3.1 Diagnosis
+- Exposure history: mould, birds, feathers, occupational antigens (farmer's lung, bird fancier's lung)
+- Acute/subacute HP: ground-glass opacity, poorly defined centrilobular nodules, mosaic attenuation
+- Chronic fibrotic HP: UIP-like or NSIP-like fibrosis, often with upper/mid zone predominance
+- BAL lymphocytosis >20% supports HP
+- Serum precipitins (specific IgG): positive in ~50-60% of cases
+
+3.2 Key Distinguishing Features from IPF
+- HP: exposure history, younger age, BAL lymphocytosis, upper/mid zone involvement, mosaic perfusion
+- IPF: age >60, male, smoker, no exposure history, UIP pattern on HRCT with honeycombing
+
+3.3 Management
+- Antigen avoidance: critical first step
+- Corticosteroids in subacute HP
+- Anti-fibrotics (nintedanib) for chronic fibrotic HP with progressive phenotype
+- Lung transplant evaluation for advanced fibrotic HP
+
+================================================================================
+SECTION 4: SARCOIDOSIS
+================================================================================
+
+Source: ERS Clinical Practice Guidelines on Sarcoidosis (2021)
+
+4.1 Diagnosis
+- Bilateral hilar lymphadenopathy (BHL) — hallmark finding
+- Non-caseating granulomas on biopsy
+- HRCT: peribronchovascular nodules, upper/mid zone predominance, lymphadenopathy
+- Serum ACE elevated in ~60% (not diagnostic)
+- BAL: CD4:CD8 ratio >3.5 supports sarcoidosis
+
+4.2 Distinguishing from IPF/ILD
+- Sarcoidosis: upper/mid zone, lymphadenopathy, peribronchovascular distribution, younger patients
+- IPF: lower/basal, subpleural, honeycombing, no lymphadenopathy
+
+4.3 Treatment Indications
+- Stage II-IV with symptoms or declining PFTs
+- First-line: prednisolone 20-40 mg/day, taper over 12-24 months
+- Methotrexate, azathioprine, hydroxychloroquine as steroid-sparing agents
+
+================================================================================
+SECTION 5: IPF MONITORING AND MANAGEMENT
+================================================================================
+
+Source: NICE Guideline NG163 — Idiopathic Pulmonary Fibrosis (2021)
+
+5.1 Monitoring
+- PFTs every 3-6 months: ≥10% relative decline in FVC over 12 months = disease progression
+- 6-minute walk test
+- SpO2 at rest and on exertion
+- Annual HRCT in selected patients
+
+5.2 Anti-fibrotic Therapy
+- Nintedanib or pirfenidone recommended for mild-moderate IPF (FVC >50% predicted)
+- Both reduce rate of FVC decline by ~50%
+- Do not improve survival but slow progression
+
+5.3 Oxygen Therapy
+- Ambulatory oxygen if SpO2 <88% on exertion or <92% at rest
+- Long-term oxygen therapy (LTOT) for resting hypoxaemia
+
+5.4 Lung Transplantation
+- Refer early: FVC <80% predicted, DLCO <40%, 6MWT desaturation <88%, or significant decline
+- Single or bilateral lung transplant
+- Median post-transplant survival: 5-6 years
+
+5.5 Palliative Care
+- Breathlessness management: low-dose opioids (morphine), benzodiazepines for anxiety
+- Pulmonary rehabilitation
+- Advanced care planning discussions
+
+================================================================================
+SECTION 6: PULMONARY FUNCTION TESTS IN ILD
+================================================================================
+
+6.1 Restrictive Pattern
+- FVC <80% predicted + FEV1/FVC ≥0.70 = restriction
+- TLC <80% predicted confirms restriction
+- FVC <50% predicted: severe restriction
+
+6.2 DLCO in ILD
+- DLCO <70% predicted: mild-moderate impairment
+- DLCO <40% predicted: severe impairment
+- Isolated low DLCO with normal spirometry: consider pulmonary vascular disease, emphysema, early ILD
+
+6.3 PFT Progression Criteria
+- FVC decline ≥5% absolute in 6 months: clinically significant
+- FVC decline ≥10% absolute in 12 months: high-risk progression
+- DLCO decline ≥15% absolute: significant deterioration
+
+================================================================================
+SECTION 7: OCCUPATIONAL AND ENVIRONMENTAL ILD
+================================================================================
+
+7.1 Asbestosis
+- Occupational asbestos exposure (insulation, shipbuilding, construction)
+- Bilateral lower lobe fibrosis with pleural plaques
+- HRCT: subpleural bands, honeycombing, pleural plaques/thickening
+- Distinguishing from IPF: pleural disease, exposure history
+
+7.2 Silicosis
+- Occupational silica exposure (mining, sandblasting, quarrying, farming — soil exposure)
+- Upper/mid zone nodular fibrosis
+- HRCT: upper lobe nodules, eggshell calcification of lymph nodes
+- Note: farming occupation increases risk of both silicosis and HP (organic dust)
+
+7.3 Farmer's Lung (HP from organic dust)
+- Exposure to mouldy hay, grain, compost
+- Thermophilic actinomycetes antigens
+- Acute: fever, breathlessness 4-8 hours post-exposure
+- Chronic: fibrotic ILD indistinguishable from IPF on HRCT

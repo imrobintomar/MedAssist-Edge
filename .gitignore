@@ -1,0 +1,48 @@
+# Model weights (too large for git — download via scripts/download_weights.py)
+model/
+*.safetensors
+*.bin
+*.gguf
+
+# Vector store (rebuild with scripts/setup_rag.py)
+vector_store/
+embed_cache/
+
+# Logs / audit trail (runtime data)
+logs/
+*.jsonl
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+*.env
+
+# Node / frontend build
+frontend/node_modules/
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Notebooks output
+notebooks/.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
