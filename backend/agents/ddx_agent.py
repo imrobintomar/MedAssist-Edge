@@ -86,9 +86,15 @@ def _extract_json_object(text: str) -> str | None:
 
 
 def _strip_thinking_blocks(text: str) -> str:
-    """Remove MedGemma <unusedXX>thought...</unusedXX> thinking blocks."""
-    text = re.sub(r"<unused\d+>thought\s*", "", text)
-    text = re.sub(r"<unused\d+>", "", text)
+    """Remove MedGemma thinking blocks including their content."""
+    text = re.sub(r"<unused\d+>.*?<unused\d+>", "", text, flags=re.DOTALL)
+    match = re.search(r"<unused\d+>", text)
+    if match:
+        brace = text.find("{", match.start())
+        if brace != -1:
+            text = text[brace:]
+        else:
+            text = text[: match.start()]
     return text
 
 
@@ -141,6 +147,6 @@ def run(soap: "SOAPNote", data: "ClinicalInput", engine) -> "DifferentialDiagnos
 
     return DifferentialDiagnosis(
         diagnoses=entries,
-        reasoning_summary=parsed.get("reasoning_summary", "Unavailable."),
+        reasoning_summary=_to_str(parsed.get("reasoning_summary", "Unavailable.")),
         raw=raw,
     )

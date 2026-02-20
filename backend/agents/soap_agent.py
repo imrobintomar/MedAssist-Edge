@@ -59,10 +59,27 @@ def build_messages(data: "ClinicalInput") -> List[dict]:
 
 
 def _strip_thinking_blocks(text: str) -> str:
-    """Remove MedGemma <unusedXX>thought...</unusedXX> thinking blocks."""
-    text = re.sub(r"<unused\d+>thought\s*", "", text)
-    text = re.sub(r"<unused\d+>", "", text)
+    """Remove MedGemma thinking blocks including their content."""
+    # Remove complete <unusedN>...<unusedN> blocks
+    text = re.sub(r"<unused\d+>.*?<unused\d+>", "", text, flags=re.DOTALL)
+    # Any remaining opening tag (unclosed) — strip to first '{'
+    match = re.search(r"<unused\d+>", text)
+    if match:
+        brace = text.find("{", match.start())
+        if brace != -1:
+            text = text[brace:]
+        else:
+            text = text[: match.start()]
     return text
+
+
+def _to_str(value) -> str:
+    """Coerce a parsed JSON value to str (model sometimes returns list instead of string)."""
+    if isinstance(value, list):
+        return "\n".join(str(item).strip() for item in value if item)
+    if isinstance(value, str):
+        return value
+    return str(value) if value is not None else "Not documented."
 
 
 def parse_response(raw: str) -> dict:
@@ -103,9 +120,9 @@ def run(data: "ClinicalInput", engine) -> "SOAPNote":
         )
 
     return SOAPNote(
-        subjective=parsed.get("subjective", "Not documented."),
-        objective=parsed.get("objective", "Not documented."),
-        assessment=parsed.get("assessment", "Not documented."),
-        plan_suggestions=parsed.get("plan_suggestions", "Not documented."),
+        subjective=_to_str(parsed.get("subjective", "Not documented.")),
+        objective=_to_str(parsed.get("objective", "Not documented.")),
+        assessment=_to_str(parsed.get("assessment", "Not documented.")),
+        plan_suggestions=_to_str(parsed.get("plan_suggestions", "Not documented.")),
         raw=raw,
     )
