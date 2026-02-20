@@ -169,8 +169,9 @@ def parse_response(raw: str) -> dict:
 def run(soap: "SOAPNote", ddx: "DifferentialDiagnosis", engine) -> "PatientExplanation":
     from schemas import PatientExplanation
 
+    from config import AGENT_MAX_TOKENS
     messages = build_messages(soap, ddx)
-    raw = engine.generate(messages)
+    raw = engine.generate(messages, max_new_tokens=AGENT_MAX_TOKENS["patient"])
     parsed = parse_response(raw)
 
     key_points: List[str] = parsed.get("key_points", [])

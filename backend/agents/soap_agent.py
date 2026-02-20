@@ -89,8 +89,9 @@ def parse_response(raw: str) -> dict:
 def run(data: "ClinicalInput", engine) -> "SOAPNote":
     from schemas import SOAPNote
 
+    from config import AGENT_MAX_TOKENS
     messages = build_messages(data)
-    raw = engine.generate(messages)
+    raw = engine.generate(messages, max_new_tokens=AGENT_MAX_TOKENS["soap"])
     parsed = parse_response(raw)
 
     if "error" in parsed:

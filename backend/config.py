@@ -26,11 +26,19 @@ QUANTIZATION = os.getenv("QUANTIZATION", "int8")
 FORCE_CPU = False  # always use CPU; set False to allow GPU if available
 
 # Generation defaults — greedy decoding per official Jan 23 2026 update
-# (model card: "Updated generation config to use greedy decoding by default")
 GENERATION_CONFIG = {
-    "max_new_tokens": 2048,      # Guidelines with 4 categories can exceed 1536 tokens
+    "max_new_tokens": 1024,      # default; agents override per-call (see below)
     "do_sample": False,          # greedy decoding — deterministic, safer
     "repetition_penalty": 1.15,
+}
+
+# Per-agent token budgets — tighter limits = faster inference
+# Tuned so output fits comfortably without wasted generation
+AGENT_MAX_TOKENS = {
+    "soap":      768,   # 4 SOAP sections, structured text
+    "ddx":       900,   # 5 diagnoses + reasoning summary
+    "patient":   768,   # summary + 6 key points + next steps
+    "guideline": 0,     # no LLM call — rule-based parser only
 }
 
 # ── RAG settings ──────────────────────────────────────────────────────────────

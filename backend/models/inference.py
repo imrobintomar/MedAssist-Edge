@@ -73,16 +73,14 @@ class InferenceEngine:
         )
         self._loaded = True
 
-    def generate(self, messages: List[dict]) -> str:
+    def generate(self, messages: List[dict], max_new_tokens: Optional[int] = None) -> str:
         """
         Run a single text-only generation pass.
 
         Args:
-            messages: List of role/content dicts, e.g.:
-                [
-                    {"role": "system", "content": [{"type": "text", "text": "..."}]},
-                    {"role": "user",   "content": [{"type": "text", "text": "..."}]},
-                ]
+            messages: List of role/content dicts.
+            max_new_tokens: Override the default token budget for this call.
+                            Pass per-agent limits from AGENT_MAX_TOKENS in config.
 
         Returns:
             Assistant response text (stripped, no special tokens).
@@ -106,11 +104,12 @@ class InferenceEngine:
         ).to(self.model.device, dtype=dtype)
 
         input_len = inputs["input_ids"].shape[-1]
+        tokens = max_new_tokens or self._gen_cfg.get("max_new_tokens", 768)
 
         with torch.inference_mode():
             output_ids = self.model.generate(
                 **inputs,
-                max_new_tokens=self._gen_cfg.get("max_new_tokens", 768),
+                max_new_tokens=tokens,
                 do_sample=self._gen_cfg.get("do_sample", False),
                 repetition_penalty=self._gen_cfg.get("repetition_penalty", 1.15),
             )

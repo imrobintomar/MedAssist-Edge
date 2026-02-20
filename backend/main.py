@@ -11,6 +11,7 @@ Startup sequence:
 """
 
 from __future__ import annotations
+import asyncio
 import logging
 import sys
 import time
@@ -184,15 +185,20 @@ async def analyze(
         ddx = ddx_agent.run(soap, payload, engine)
         logger.info("DDx done (%d entries).", len(ddx.diagnoses))
 
-        # ── Agent 3: Guidelines ────────────────────────────────────────────
-        logger.info("[3/4] Guideline Retrieval Agent …")
-        guidelines = guideline_agent.run(soap, ddx, payload, retriever, engine)
-        logger.info("Guidelines done (%d recommendations).", len(guidelines.recommendations))
+        # ── Agents 3 + 4 concurrently ──────────────────────────────────────
+        # Guidelines uses no LLM (rule-based RAG parser) → runs instantly.
+        # Patient uses the LLM but doesn't depend on Guidelines output.
+        # Run both via asyncio.to_thread so they overlap in wall-clock time.
+        logger.info("[3+4/4] Guidelines (RAG) + Patient Explanation — concurrent …")
 
-        # ── Agent 4: Patient explanation ───────────────────────────────────
-        logger.info("[4/4] Patient Explanation Agent …")
-        explanation = patient_agent.run(soap, ddx, engine)
-        logger.info("Patient explanation done.")
+        guidelines, explanation = await asyncio.gather(
+            asyncio.to_thread(guideline_agent.run, soap, ddx, payload, retriever, engine),
+            asyncio.to_thread(patient_agent.run, soap, ddx, engine),
+        )
+        logger.info(
+            "Guidelines done (%d recommendations). Patient explanation done.",
+            len(guidelines.recommendations),
+        )
 
         elapsed = time.time() - t_start
         logger.info("Pipeline complete in %.1f s", elapsed)
